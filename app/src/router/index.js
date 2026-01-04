@@ -22,6 +22,11 @@ const routes = [
     component: () => import("../views/StudentLayout.vue"), // 稍后创建
     children: [
       { path: "home", component: () => import("../views/student/Home.vue") },
+
+      {
+        path: "profile",
+        component: () => import("../views/student/Profile.vue"),
+      },
     ],
   },
   // 预留：管理端路由
@@ -53,11 +58,6 @@ const routes = [
           {
             path: "home",
             component: () => import("../views/student/Home.vue"),
-          },
-          // 🛠️ 新增这里
-          {
-            path: "profile",
-            component: () => import("../views/student/Profile.vue"),
           },
         ],
       },
