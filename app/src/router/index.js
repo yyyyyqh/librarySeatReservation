@@ -22,10 +22,28 @@ const routes = [
   // 预留：管理端路由
   {
     path: "/admin",
-    component: () => import("../views/AdminLayout.vue"), // 稍后创建
+    component: () => import("../views/AdminLayout.vue"),
+    redirect: "/admin/dashboard", // 默认跳到 dashboard
     children: [
       {
         path: "dashboard",
+        name: "数据大屏",
+        component: () => import("../views/admin/Dashboard.vue"),
+      },
+      // 暂时用 Dashboard 占位，之后我们一个个实现
+      {
+        path: "room",
+        name: "阅览室管理",
+        component: () => import("../views/admin/Dashboard.vue"),
+      },
+      {
+        path: "seat",
+        name: "座位管理",
+        component: () => import("../views/admin/Dashboard.vue"),
+      },
+      {
+        path: "user",
+        name: "用户管理",
         component: () => import("../views/admin/Dashboard.vue"),
       },
     ],
