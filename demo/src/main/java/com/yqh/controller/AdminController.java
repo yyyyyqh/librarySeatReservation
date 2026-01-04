@@ -3,13 +3,16 @@ package com.yqh.controller;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.yqh.common.Result;
 import com.yqh.entity.ReadingRoom;
+import com.yqh.entity.Reservation;
 import com.yqh.entity.Seat;
 import com.yqh.entity.User;
 import com.yqh.mapper.ReadingRoomMapper;
 import com.yqh.mapper.SeatMapper;
 import com.yqh.mapper.UserMapper;
 import com.yqh.service.IReservationService;
+import com.yqh.service.ISeatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -31,6 +34,8 @@ public class AdminController {
     private UserMapper userMapper;
     @Autowired
     private IReservationService reservationService; // 注入预约服务
+    @Autowired
+    private ISeatService seatService;
 
     // ================= 阅览室管理 =================
 
@@ -85,10 +90,22 @@ public class AdminController {
     /**
      * 删除座位
      */
+    // 记得加这个注解，保证两步操作要么都成功，要么都失败
+    @Transactional(rollbackFor = Exception.class)
     @DeleteMapping("/seat/{id}")
     public Result<String> deleteSeat(@PathVariable Long id) {
-        seatMapper.deleteById(id);
-        return Result.success("座位删除成功");
+        // 1. 先删除该座位关联的所有预约记录
+        reservationService.remove(new LambdaQueryWrapper<Reservation>()
+                .eq(Reservation::getSeatId, id));
+
+        // 2. 再删除座位本身
+        boolean success = seatService.removeById(id);
+
+        if (success) {
+            return Result.success("删除成功");
+        } else {
+            return Result.error("删除失败，座位可能不存在");
+        }
     }
 
     // ================= 用户管理 =================
