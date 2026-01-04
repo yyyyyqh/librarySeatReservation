@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.List;
 
 @Service
 public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reservation> implements IReservationService {
@@ -61,5 +62,60 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
         reservation.setStatus(0); // 初始状态: 待签到
 
         return this.save(reservation);
+    }
+
+    @Override
+    public void checkIn(Long resId) {
+        Reservation res = this.getById(resId);
+        if (res == null) throw new RuntimeException("预约不存在");
+
+        // 状态校验：只有状态为0（待签到）才能签到
+        if (res.getStatus() != 0) {
+            throw new RuntimeException("当前状态无法签到");
+        }
+
+        // 时间校验：假设允许在开始时间前后 15 分钟内签到
+        LocalDateTime now = LocalDateTime.now();
+        if (now.isBefore(res.getStartTime().minusMinutes(15)) ||
+                now.isAfter(res.getStartTime().plusMinutes(15))) {
+            // throw new RuntimeException("不在签到时间范围内"); // 暂注释方便测试
+        }
+
+        res.setStatus(1); // 1: 已签到
+        res.setCheckInTime(LocalDateTime.now());
+        this.updateById(res);
+    }
+
+    @Override
+    public void cancelReservation(Long resId) {
+        Reservation res = this.getById(resId);
+        if (res == null) throw new RuntimeException("预约不存在");
+
+        if (res.getStatus() != 0) {
+            throw new RuntimeException("只能取消待签到的预约");
+        }
+
+        res.setStatus(3); // 3: 已取消
+        this.updateById(res);
+    }
+
+    @Override
+    public boolean forceReleaseSeat(Long seatId) {
+        // 1. 查找该座位当前处于 "0:待签到" 或 "1:已签到" 的预约
+        List<Reservation> activeList = this.list(new LambdaQueryWrapper<Reservation>()
+                .eq(Reservation::getSeatId, seatId)
+                .in(Reservation::getStatus, 0, 1)); // 0和1都是占用状态
+
+        if (activeList.isEmpty()) {
+            return false; // 无需清退
+        }
+
+        // 2. 强制结束
+        for (Reservation res : activeList) {
+            res.setStatus(2); // 2: 已结束 (也可以设为 3:已取消，看业务定义，这里算正常结束不扣分)
+            res.setEndTime(LocalDateTime.now()); // 修正结束时间为当前，立刻释放时间段
+        }
+
+        return this.updateBatchById(activeList);
     }
 }

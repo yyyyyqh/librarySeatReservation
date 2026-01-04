@@ -49,4 +49,24 @@ public class ReservationController {
                         .list()
         );
     }
+
+    @PostMapping("/checkin")
+    public Result<Boolean> checkIn(@RequestBody Map<String, Long> params) {
+        try {
+            reservationService.checkIn(params.get("resId"));
+            return Result.success(true);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
+
+    @PostMapping("/cancel")
+    public Result<Boolean> cancel(@RequestBody Map<String, Long> params) {
+        try {
+            reservationService.cancelReservation(params.get("resId"));
+            return Result.success(true);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }

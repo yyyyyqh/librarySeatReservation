@@ -13,4 +13,21 @@ public interface IReservationService extends IService<Reservation> {
      * @return 是否成功
      */
     boolean reserveSeat(Long userId, Long seatId, String startTime, String endTime);
+
+    /**
+     * 签到
+     * @param resId 预约记录ID
+     */
+    void checkIn(Long resId);
+
+    /**
+     * 取消预约
+     * @param resId 预约记录ID
+     */
+    void cancelReservation(Long resId);
+
+    /**
+     * 座位清退
+     */
+    boolean forceReleaseSeat(Long seatId);
 }
