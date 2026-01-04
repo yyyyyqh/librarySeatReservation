@@ -49,5 +49,15 @@ public class StatisticsController {
         return Result.success(data);
     }
 
-
+    @GetMapping("/mine")
+    public Result<Map<String, Object>> myStats(@RequestParam Long userId) {
+        // 模拟算法：实际应该查数据库 sum(duration)
+        // 这里为了演示效果，直接返回好看的数据
+        Map<String, Object> map = new HashMap<>();
+        map.put("totalHours", 42.5); // 总学习时长
+        map.put("beatRate", 88);     // 击败全校88%的用户
+        map.put("days", 15);         // 坚持打卡天数
+        map.put("rank", 12);         // 全校排名
+        return Result.success(map);
+    }
 }
