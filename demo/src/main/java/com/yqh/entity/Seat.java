@@ -23,7 +23,7 @@ public class Seat {
     @TableField("x_axis")
     @JsonProperty("xAxis")
     private Integer xAxis;
-    
+
     @TableField("y_axis")
     @JsonProperty("yAxis")
     private Integer yAxis;

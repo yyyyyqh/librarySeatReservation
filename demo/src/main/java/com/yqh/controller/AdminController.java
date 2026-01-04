@@ -130,4 +130,12 @@ public class AdminController {
             return Result.error("该座位当前没有正在进行的预约");
         }
     }
+
+    /**
+     * 获取所有用户列表
+     */
+    @GetMapping("/user/list")
+    public Result<java.util.List<User>> listUsers() {
+        return Result.success(userMapper.selectList(null));
+    }
 }

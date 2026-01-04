@@ -44,7 +44,7 @@ const routes = [
       {
         path: "user",
         name: "用户管理",
-        component: () => import("../views/admin/Dashboard.vue"),
+        component: () => import("../views/admin/UserManagement.vue"),
       },
     ],
   },
