@@ -12,7 +12,7 @@
         y="10"
         width="780"
         height="580"
-        fill="#f5f7fa"
+        fill="#ffffff"
         stroke="#e4e7ed"
         stroke-width="2"
       />

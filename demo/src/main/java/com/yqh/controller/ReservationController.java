@@ -2,10 +2,13 @@ package com.yqh.controller;
 
 import com.yqh.common.Result;
 import com.yqh.entity.Reservation;
+import com.yqh.entity.Seat;
 import com.yqh.service.IReservationService;
+import com.yqh.service.ISeatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -69,4 +72,6 @@ public class ReservationController {
             return Result.error(e.getMessage());
         }
     }
+
+
 }
