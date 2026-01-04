@@ -4,6 +4,9 @@
       <div class="item"><span class="dot available"></span>空闲</div>
       <div class="item"><span class="dot occupied"></span>占用</div>
       <div class="item"><span class="dot selected"></span>已选</div>
+      <div class="separator">|</div>
+      <div class="item"><span class="badge-icon socket">⚡</span>有插座</div>
+      <div class="item"><span class="badge-icon window">🪟</span>靠窗</div>
     </div>
 
     <svg viewBox="0 0 800 600" class="seat-svg">
@@ -39,6 +42,49 @@
         >
           {{ seat.seatNum }}
         </text>
+
+        <g
+          v-if="seat.hasSocket"
+          :transform="`translate(${seat.xaxis + 12}, ${seat.yaxis - 12})`"
+        >
+          <circle r="7" fill="#E6A23C" stroke="white" stroke-width="1" />
+          <path d="M-1 -4 L3 -4 L0 0 L2 0 L-2 5 L-1 1 L-3 1 Z" fill="white" />
+        </g>
+
+        <g
+          v-if="seat.isWindow"
+          :transform="`translate(${seat.xaxis - 12}, ${seat.yaxis - 12})`"
+        >
+          <circle r="7" fill="#409EFF" stroke="white" stroke-width="1" />
+          <rect
+            x="-3.5"
+            y="-3.5"
+            width="7"
+            height="7"
+            rx="1"
+            fill="none"
+            stroke="white"
+            stroke-width="1.2"
+          />
+          <line
+            x1="0"
+            y1="-3.5"
+            x2="0"
+            y2="3.5"
+            stroke="white"
+            stroke-width="1.2"
+          />
+          <line
+            x1="-3.5"
+            y1="0"
+            x2="3.5"
+            y2="0"
+            stroke="white"
+            stroke-width="1.2"
+          />
+        </g>
+
+        <title>{{ getSeatTooltip(seat) }}</title>
       </g>
     </svg>
   </div>
@@ -52,7 +98,6 @@ const props = defineProps({
     type: Array,
     default: () => [],
   },
-  // 当前选中的座位ID
   selectedId: {
     type: [Number, String],
     default: null,
@@ -61,14 +106,20 @@ const props = defineProps({
 
 const emit = defineEmits(["select"]);
 
-// 计算样式类
+// 计算主体样式 (状态颜色)
 const getSeatClass = (seat) => {
-  if (seat.status === 0) return "disabled"; // 停用
-  // 注意：后端返回的 status 是座位物理状态。
-  // 实际业务中，我们会动态给 seat 对象追加一个 _occupied 属性来表示当前时间段是否有人
+  if (seat.status === 0) return "disabled";
   if (seat._occupied) return "occupied";
   if (props.selectedId === seat.seatId) return "selected";
   return "available";
+};
+
+// 构造 Title 提示
+const getSeatTooltip = (seat) => {
+  let tips = seat.seatNum;
+  if (seat.hasSocket) tips += " [插座]";
+  if (seat.isWindow) tips += " [靠窗]";
+  return tips;
 };
 
 const handleSeatClick = (seat) => {
@@ -88,68 +139,96 @@ const handleSeatClick = (seat) => {
 
 .legend {
   display: flex;
-  gap: 20px;
+  gap: 15px;
   margin-bottom: 10px;
+  background: #fdfdfd;
+  padding: 8px 15px;
+  border-radius: 20px;
+  border: 1px solid #eee;
+
+  .separator {
+    color: #ddd;
+    font-size: 12px;
+  }
+
   .item {
     display: flex;
     align-items: center;
-    font-size: 14px;
+    font-size: 12px;
+    color: #606266;
+
     .dot {
-      width: 12px;
-      height: 12px;
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
       margin-right: 5px;
       &.available {
         background: #67c23a;
-      } // 绿色
+      }
       &.occupied {
         background: #f56c6c;
-      } // 红色
+      }
       &.selected {
         background: #409eff;
-      } // 蓝色
+      }
+    }
+
+    .badge-icon {
+      font-size: 14px;
+      margin-right: 3px;
+      &.socket {
+        color: #e6a23c;
+      }
+      &.window {
+        color: #409eff;
+      }
     }
   }
 }
 
 .seat-svg {
   width: 100%;
-  max-width: 800px; // 限制最大宽度
+  max-width: 800px;
   height: auto;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
-  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  border-radius: 8px;
+  background: #fff;
 
   .seat-group {
     cursor: pointer;
-    transition: all 0.3s;
-    &:hover .seat-shape.available {
-      stroke: #409eff;
-      stroke-width: 2px;
+    transition: opacity 0.2s;
+    &:hover {
+      opacity: 0.8;
     }
   }
 
   .seat-shape {
     stroke: none;
+    transition: fill 0.3s;
     &.available {
       fill: #67c23a;
-    }
+    } /* 默认绿色 */
     &.occupied {
       fill: #f56c6c;
       cursor: not-allowed;
-    }
+    } /* 占用红色 */
     &.selected {
       fill: #409eff;
-    }
+      stroke: #b3d8ff;
+      stroke-width: 3px;
+    } /* 选中蓝色 */
     &.disabled {
-      fill: #909399;
+      fill: #dcdfe6;
       cursor: not-allowed;
-    }
+    } /* 停用灰色 */
   }
 
   .seat-text {
     font-size: 10px;
     fill: white;
-    pointer-events: none; // 让文字不挡住点击事件
+    font-weight: bold;
+    pointer-events: none;
+    user-select: none;
   }
 }
 </style>
