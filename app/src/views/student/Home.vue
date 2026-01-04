@@ -1,18 +1,5 @@
 <template>
   <div class="student-home">
-    <div class="header">
-      <h2>📚 选座大厅</h2>
-      <div class="user-info">
-        <span
-          style="cursor: pointer; margin-right: 15px; color: #409eff"
-          @click="router.push('/student/profile')"
-        >
-          {{ userStore.userInfo?.realName }}
-        </span>
-        <el-button link type="danger" @click="handleLogout">退出</el-button>
-      </div>
-    </div>
-
     <div class="main-content">
       <div class="filter-panel">
         <el-card>
@@ -336,7 +323,6 @@ const getStatusType = (status) => {
 .main-content {
   flex: 1;
   display: flex;
-  padding: 20px;
   gap: 20px;
   background: #f5f7fa;
 }

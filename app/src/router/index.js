@@ -16,10 +16,11 @@ const routes = [
     name: "Register",
     component: () => import("../views/Register.vue"),
   },
-  // 预留：学生端路由
+  // 学生端路由
   {
     path: "/student",
-    component: () => import("../views/StudentLayout.vue"), // 稍后创建
+    meta: { requiresAuth: true, role: 0 },
+    component: () => import("../views/StudentLayout.vue"),
     children: [
       { path: "home", component: () => import("../views/student/Home.vue") },
 
@@ -29,9 +30,10 @@ const routes = [
       },
     ],
   },
-  // 预留：管理端路由
+  // 管理端路由
   {
     path: "/admin",
+    meta: { requiresAuth: true, role: 2 }, // 标记权限
     component: () => import("../views/AdminLayout.vue"),
     redirect: "/admin/dashboard", // 默认跳到 dashboard
     children: [
@@ -40,7 +42,6 @@ const routes = [
         name: "数据大屏",
         component: () => import("../views/admin/Dashboard.vue"),
       },
-      // 暂时用 Dashboard 占位，之后我们一个个实现
       {
         path: "room",
         name: "阅览室管理",
@@ -79,12 +80,25 @@ const router = createRouter({
 router.beforeEach((to, from, next) => {
   const userStore = useUserStore();
   userStore.initUser(); // 尝试从本地恢复用户信息
+  const user = userStore.userInfo;
 
-  if (to.path !== "/login" && !userStore.userInfo) {
-    next("/login");
-  } else {
+  // 如果去登录/注册页，直接放行
+  if (to.path === "/login" || to.path === "/register") {
     next();
+    return;
   }
+
+  // 未登录，踢回登录页
+  if (!user) {
+    next("/login");
+    return;
+  }
+  // 简单的权限拦截 (防止学生手动输入 /admin/dashboard)
+  if (to.path.startsWith("/admin") && user.identityType !== 2) {
+    next("/student/home"); // 学生想进后台？踢回首页
+    return;
+  }
+  next();
 });
 
 export default router;
