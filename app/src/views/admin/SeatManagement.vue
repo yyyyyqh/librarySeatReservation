@@ -60,17 +60,22 @@
                 {{ row.xaxis }}, {{ row.yaxis }}
               </template>
             </el-table-column>
-            <el-table-column label="属性" width="150">
+            <el-table-column label="属性" width="180">
               <template #default="{ row }">
-                <el-tag v-if="row.hasSocket" size="small" type="warning"
-                  >插座</el-tag
+                <el-tag
+                  v-if="row.hasSocket"
+                  size="small"
+                  type="warning"
+                  effect="dark"
+                  >⚡ 插座</el-tag
                 >
                 <el-tag
                   v-if="row.isWindow"
                   size="small"
                   type="success"
+                  effect="dark"
                   style="margin-left: 5px"
-                  >靠窗</el-tag
+                  >🪟 靠窗</el-tag
                 >
               </template>
             </el-table-column>
@@ -108,7 +113,6 @@
             :max="800"
             :step="10"
           />
-          <div class="tip-text">画布范围 0-800</div>
         </el-form-item>
         <el-form-item label="Y 坐标">
           <el-input-number
@@ -117,7 +121,6 @@
             :max="600"
             :step="10"
           />
-          <div class="tip-text">画布范围 0-600</div>
         </el-form-item>
         <el-form-item label="设施">
           <el-checkbox v-model="form.hasSocket" :true-label="1" :false-label="0"
@@ -136,12 +139,12 @@
 
     <el-dialog
       v-model="batchDialogVisible"
-      title="🧩 批量座位生成器"
-      width="620px"
+      title="🎨 可视化座位设计器"
+      width="680px"
     >
       <div class="batch-header">
         <el-form inline>
-          <el-form-item label="行数 (排)">
+          <el-form-item label="行数">
             <el-input-number
               v-model="batchRows"
               :min="1"
@@ -149,7 +152,7 @@
               @change="initGrid"
             />
           </el-form-item>
-          <el-form-item label="列数 (列)">
+          <el-form-item label="列数">
             <el-input-number
               v-model="batchCols"
               :min="1"
@@ -158,12 +161,20 @@
             />
           </el-form-item>
         </el-form>
+
+        <div class="brush-selector">
+          <span class="brush-label">当前画笔：</span>
+          <el-radio-group v-model="currentBrush" size="large">
+            <el-radio-button label="std">🟢 普通座</el-radio-button>
+            <el-radio-button label="socket">⚡ 带插座</el-radio-button>
+            <el-radio-button label="window">🪟 靠窗</el-radio-button>
+            <el-radio-button label="vip">👑 VIP全配</el-radio-button>
+          </el-radio-group>
+        </div>
+
         <div class="tips">
-          💡 操作提示：点击下方的方格，<span
-            style="color: #67c23a; font-weight: bold"
-            >绿色</span
-          >
-          代表生成座位，白色代表过道。
+          💡
+          操作提示：选中上方一种画笔，然后在下方网格点击绘制。再次点击已绘制的格子可取消。
         </div>
       </div>
 
@@ -172,25 +183,28 @@
           <div
             v-for="(cell, index) in flatGrid"
             :key="index"
-            :class="['grid-cell', { active: cell.selected }]"
+            :class="['grid-cell', cell.type]"
             @click="toggleCell(index)"
           >
-            <span v-if="cell.selected">{{
-              getSeatLabel(cell.row, cell.col)
-            }}</span>
+            <span v-if="cell.type">{{ getSeatLabel(cell.row, cell.col) }}</span>
           </div>
         </div>
       </div>
 
       <template #footer>
-        <el-button @click="batchDialogVisible = false">取消</el-button>
-        <el-button
-          type="primary"
-          @click="submitBatch"
-          :loading="batchSubmitting"
-        >
-          🚀 立即生成 {{ selectedCount }} 个座位
-        </el-button>
+        <div class="batch-footer">
+          <span style="margin-right: auto; color: #999">
+            已绘制: {{ selectedCount }} 个座位
+          </span>
+          <el-button @click="batchDialogVisible = false">取消</el-button>
+          <el-button
+            type="primary"
+            @click="submitBatch"
+            :loading="batchSubmitting"
+          >
+            🚀 立即生成
+          </el-button>
+        </div>
       </template>
     </el-dialog>
   </div>
@@ -218,12 +232,13 @@ const form = reactive({
   status: 1,
 });
 
-// --- 批量生成相关变量 ---
+// --- 批量生成 & 画笔 相关变量 ---
 const batchDialogVisible = ref(false);
 const batchSubmitting = ref(false);
-const batchRows = ref(5); // 默认5行
-const batchCols = ref(6); // 默认6列
-const flatGrid = ref([]); // 网格数据
+const batchRows = ref(5);
+const batchCols = ref(6);
+const flatGrid = ref([]);
+const currentBrush = ref("std"); // 默认画笔类型
 
 // --- 初始化 ---
 onMounted(() => {
@@ -247,7 +262,7 @@ const handleRoomChange = async () => {
     params: { roomId: currentRoomId.value },
   });
 
-  // 映射字段确保兼容性
+  // 映射字段 (处理后端可能的大小写差异)
   seatList.value = res.map((s) => ({
     ...s,
     xaxis: s.xaxis || s.xAxis || s.x_axis || 0,
@@ -272,7 +287,6 @@ const handleAdd = () => {
 
 const submitAdd = async () => {
   if (!form.seatNum) return ElMessage.warning("请输入座位号");
-  // 注意：这里的接口路径按您的后端调整，可能是 /api/seat/add 或 /api/admin/seat/add
   await request.post("/api/admin/seat/add", {
     roomId: currentRoomId.value,
     ...form,
@@ -287,7 +301,6 @@ const handleDelete = (row) => {
   ElMessageBox.confirm(`确定删除座位 ${row.seatNum} 吗？`, "警告", {
     type: "warning",
   }).then(async () => {
-    // 同样注意接口路径
     await request.delete(`/api/admin/seat/${row.seatId}`);
     ElMessage.success("已删除");
     refreshData();
@@ -306,10 +319,9 @@ const handleForceClear = (row) => {
 };
 
 // ==========================================
-// ✨ 批量生成逻辑 START
+// ✨ 批量生成逻辑 (画笔模式) START
 // ==========================================
 
-// 打开批量弹窗
 const openBatchDialog = () => {
   if (!currentRoomId.value) {
     return ElMessage.warning("请先在左上角选择一个阅览室！");
@@ -318,7 +330,7 @@ const openBatchDialog = () => {
   initGrid();
 };
 
-// 初始化网格数据
+// 初始化网格 (type为空字符串表示未选中)
 const initGrid = () => {
   const arr = [];
   for (let r = 0; r < batchRows.value; r++) {
@@ -326,66 +338,85 @@ const initGrid = () => {
       arr.push({
         row: r,
         col: c,
-        selected: false, // 默认白色（不选）
+        type: "",
       });
     }
   }
   flatGrid.value = arr;
 };
 
-// 计算 Grid 样式 (动态列数)
+// Grid 样式
 const gridStyle = computed(() => ({
   display: "grid",
-  gridTemplateColumns: `repeat(${batchCols.value}, 45px)`, // 每列宽45px
+  gridTemplateColumns: `repeat(${batchCols.value}, 45px)`,
   gap: "10px",
   justifyContent: "center",
 }));
 
-// 统计已选个数
+// 统计已绘个数
 const selectedCount = computed(
-  () => flatGrid.value.filter((i) => i.selected).length
+  () => flatGrid.value.filter((i) => i.type).length
 );
 
-// 点击格子切换状态
+// 点击格子 -> 上色或取消
 const toggleCell = (index) => {
-  flatGrid.value[index].selected = !flatGrid.value[index].selected;
+  const cell = flatGrid.value[index];
+  if (cell.type === currentBrush.value) {
+    cell.type = ""; // 如果颜色一样，点击取消
+  } else {
+    cell.type = currentBrush.value; // 否则涂上当前画笔颜色
+  }
 };
 
-// 辅助：生成座位号 (A-001)
+// 辅助：生成座位号
 const getSeatLabel = (r, c) => {
-  const rowChar = String.fromCharCode(65 + r); // 0->A
-  const colNum = String(c + 1).padStart(3, "0"); // 0->001
+  const rowChar = String.fromCharCode(65 + r);
+  const colNum = String(c + 1).padStart(3, "0");
   return `${rowChar}-${colNum}`;
 };
 
 // 提交批量
 const submitBatch = async () => {
-  const selectedCells = flatGrid.value.filter((i) => i.selected);
+  const selectedCells = flatGrid.value.filter((i) => i.type);
   if (selectedCells.length === 0) {
-    return ElMessage.warning("请至少点选一个格子");
+    return ElMessage.warning("请至少绘制一个座位");
   }
 
   batchSubmitting.value = true;
   try {
     const seatsToAdd = selectedCells.map((cell) => {
-      // 📐 坐标算法：起始50，间距60
+      // 📐 坐标算法
       const startX = 50;
       const startY = 50;
       const gap = 60;
 
+      // 根据画笔类型设置属性
+      let hasSocket = 0;
+      let isWindow = 0;
+      if (cell.type === "socket") {
+        hasSocket = 1;
+      }
+      if (cell.type === "window") {
+        isWindow = 1;
+      }
+      if (cell.type === "vip") {
+        hasSocket = 1;
+        isWindow = 1;
+      }
+
       return {
         roomId: currentRoomId.value,
         seatNum: getSeatLabel(cell.row, cell.col),
+        // 注意：这里使用驼峰命名 xAxis/yAxis 以匹配后端 Entity
         xAxis: startX + cell.col * gap,
         yAxis: startY + cell.row * gap,
-        status: 1, // 启用
-        type: 0, // 普通座
-        hasSocket: 0, // 默认无插座，如需可让用户勾选
-        isWindow: 0,
+        status: 1,
+        type: 0,
+        hasSocket: hasSocket,
+        isWindow: isWindow,
       };
     });
 
-    // 调用后端批量接口
     await request.post("/api/seat/batch-add", seatsToAdd);
 
     ElMessage.success(`成功生成 ${seatsToAdd.length} 个座位！`);
@@ -422,18 +453,28 @@ const submitBatch = async () => {
 .tip-text {
   font-size: 12px;
   color: #999;
-  line-height: 20px;
 }
 
 /* 批量生成器样式 */
 .batch-header {
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 15px;
+}
+.brush-selector {
+  margin: 15px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.brush-label {
+  font-weight: bold;
+  color: #606266;
 }
 .tips {
   font-size: 13px;
   color: #909399;
-  margin-top: 5px;
+  margin-top: 10px;
 }
 
 .grid-wrapper {
@@ -447,11 +488,13 @@ const submitBatch = async () => {
   justify-content: center;
 }
 
-.grid-container {
-  /* 由 computed 动态生成 grid-template-columns */
+.batch-footer {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }
 
-/* 格子样式 */
+/* 格子基础样式 */
 .grid-cell {
   width: 45px;
   height: 45px;
@@ -467,16 +510,27 @@ const submitBatch = async () => {
   transition: all 0.2s;
   user-select: none;
 }
-
 .grid-cell:hover {
-  border-color: #409eff;
-  transform: scale(1.05);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  z-index: 1;
 }
 
-.grid-cell.active {
-  background: #67c23a; /* 选中变绿 */
+/* ✨ 不同类型的画笔颜色 ✨ */
+.grid-cell.std {
+  background: #67c23a; /* 绿色 */
   border-color: #529b2e;
-  font-weight: bold;
+}
+.grid-cell.socket {
+  background: #e6a23c; /* 橙色 */
+  border-color: #b88230;
+}
+.grid-cell.window {
+  background: #409eff; /* 蓝色 */
+  border-color: #337ecc;
+}
+.grid-cell.vip {
+  background: #8e44ad; /* 紫色 */
+  border-color: #6c3483;
 }
 </style>
