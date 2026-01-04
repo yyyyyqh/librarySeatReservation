@@ -34,12 +34,12 @@ const routes = [
       {
         path: "room",
         name: "阅览室管理",
-        component: () => import("../views/admin/Dashboard.vue"),
+        component: () => import("../views/admin/RoomManagement.vue"),
       },
       {
         path: "seat",
         name: "座位管理",
-        component: () => import("../views/admin/Dashboard.vue"),
+        component: () => import("../views/admin/SeatManagement.vue"),
       },
       {
         path: "user",
