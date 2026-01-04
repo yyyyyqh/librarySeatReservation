@@ -3,7 +3,12 @@
     <div class="header">
       <h2>📚 选座大厅</h2>
       <div class="user-info">
-        <span>{{ userStore.userInfo?.realName }}</span>
+        <span
+          style="cursor: pointer; margin-right: 15px; color: #409eff"
+          @click="router.push('/student/profile')"
+        >
+          {{ userStore.userInfo?.realName }}
+        </span>
         <el-button link type="danger" @click="handleLogout">退出</el-button>
       </div>
     </div>

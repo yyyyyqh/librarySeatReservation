@@ -34,4 +34,14 @@ public class UserController {
         User user = userService.getById(userId);
         return Result.success(user);
     }
+
+    @PostMapping("/register")
+    public Result<String> register(@RequestBody com.yqh.entity.dto.RegisterDTO registerDTO) {
+        try {
+            userService.register(registerDTO);
+            return Result.success("注册成功");
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }

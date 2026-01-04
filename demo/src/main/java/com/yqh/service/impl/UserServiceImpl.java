@@ -3,6 +3,7 @@ package com.yqh.service.impl;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yqh.entity.User;
+import com.yqh.entity.dto.RegisterDTO;
 import com.yqh.mapper.UserMapper;
 import com.yqh.service.IUserService;
 import org.springframework.stereotype.Service;
@@ -37,5 +38,36 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements IU
         user.setPassword(null);
 
         return user;
+    }
+    @Override
+    public void register(RegisterDTO dto) {
+        // 1. 校验用户名是否已存在
+        Long countUser = this.count(new LambdaQueryWrapper<User>()
+                .eq(User::getUsername, dto.getUsername()));
+        if (countUser > 0) {
+            throw new RuntimeException("该账号已被注册");
+        }
+
+        // 2. 校验学号是否已存在
+        Long countId = this.count(new LambdaQueryWrapper<User>()
+                .eq(User::getCampusId, dto.getCampusId()));
+        if (countId > 0) {
+            throw new RuntimeException("该学号已被注册");
+        }
+
+        // 3. 创建新用户对象
+        User user = new User();
+        user.setUsername(dto.getUsername());
+        user.setPassword(dto.getPassword()); // 实际项目中应加密，大作业明文即可
+        user.setRealName(dto.getRealName());
+        user.setCampusId(dto.getCampusId());
+        user.setPhone(dto.getPhone());
+
+        // 4. 设置默认值
+        user.setIdentityType(0); // 默认为 0:学生
+        user.setCreditScore(100); // 初始信用满分
+
+        // 5. 保存入库
+        this.save(user);
     }
 }

@@ -37,6 +37,11 @@
         <p>学生账号: test_student / 123456</p>
         <p>管理员账号: admin / 123456</p>
       </div>
+      <div style="text-align: right; margin-bottom: 10px">
+        <el-button link type="primary" @click="router.push('/register')"
+          >没有账号？去注册</el-button
+        >
+      </div>
     </div>
   </div>
 </template>

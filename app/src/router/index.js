@@ -11,6 +11,11 @@ const routes = [
     path: "/",
     redirect: "/login",
   },
+  {
+    path: "/register",
+    name: "Register",
+    component: () => import("../views/Register.vue"),
+  },
   // 预留：学生端路由
   {
     path: "/student",
@@ -40,6 +45,21 @@ const routes = [
         path: "seat",
         name: "座位管理",
         component: () => import("../views/admin/SeatManagement.vue"),
+      },
+      {
+        path: "/student",
+        component: () => import("../views/StudentLayout.vue"), // 假设您有这个布局文件
+        children: [
+          {
+            path: "home",
+            component: () => import("../views/student/Home.vue"),
+          },
+          // 🛠️ 新增这里
+          {
+            path: "profile",
+            component: () => import("../views/student/Profile.vue"),
+          },
+        ],
       },
       {
         path: "user",
