@@ -73,5 +73,22 @@ public class ReservationController {
         }
     }
 
-
+    /**
+     * 离座/结束使用
+     * POST /api/reservation/leave
+     * Body: { "resId": 123 }
+     */
+    @PostMapping("/leave")
+    public Result<Boolean> leave(@RequestBody Map<String, Long> params) {
+        try {
+            Long resId = params.get("resId");
+            if (resId == null) {
+                return Result.error("参数 resId 不能为空");
+            }
+            reservationService.leaveSeat(resId);
+            return Result.success(true);
+        } catch (Exception e) {
+            return Result.error(e.getMessage());
+        }
+    }
 }

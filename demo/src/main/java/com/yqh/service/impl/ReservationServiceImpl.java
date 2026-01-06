@@ -118,4 +118,25 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
 
         return this.updateBatchById(activeList);
     }
+
+    // 在 ReservationServiceImpl.java 中实现
+    @Override
+    public void leaveSeat(Long resId) {
+        Reservation res = this.getById(resId);
+        if (res == null) {
+            throw new RuntimeException("预约记录不存在");
+        }
+
+        // 只有“已签到(1)”状态的座位才能进行“离座”操作
+        if (res.getStatus() != 1) {
+            throw new RuntimeException("当前状态不是使用中，无法执行离座操作");
+        }
+
+        // 更新状态为 2:已结束
+        res.setStatus(2);
+        // 将实际结束时间修正为当前时间（提前释放座位资源）
+        res.setEndTime(LocalDateTime.now());
+
+        this.updateById(res);
+    }
 }

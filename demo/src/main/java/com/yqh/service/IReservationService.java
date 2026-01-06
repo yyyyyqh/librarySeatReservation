@@ -30,4 +30,10 @@ public interface IReservationService extends IService<Reservation> {
      * 座位清退
      */
     boolean forceReleaseSeat(Long seatId);
+
+    /**
+     * 用户主动离座/结账
+     * @param resId 预约记录ID
+     */
+    void leaveSeat(Long resId);
 }
