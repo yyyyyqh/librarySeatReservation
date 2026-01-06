@@ -27,4 +27,16 @@ public interface ReservationMapper extends BaseMapper<Reservation> {
     int countOverlappingReservations(@Param("seatId") Long seatId,
                                      @Param("startTime") LocalDateTime startTime,
                                      @Param("endTime") LocalDateTime endTime);
+
+    /**
+     * 统计指定阅览室当前时刻的占用数
+     * 逻辑：关联座位表，筛选出属于该阅览室、状态有效(0或1)、且当前时间在预约时段内的记录
+     */
+    @Select("SELECT COUNT(r.res_id) " +
+            "FROM sys_reservation r " +
+            "LEFT JOIN sys_seat s ON r.seat_id = s.seat_id " +
+            "WHERE s.room_id = #{roomId} " +
+            "AND r.status IN (0, 1) " + // 0:待签到, 1:已签到 (视为占用)
+            "AND NOW() BETWEEN r.start_time AND r.end_time")
+    Integer countOccupiedSeatsByRoom(@Param("roomId") Long roomId);
 }
