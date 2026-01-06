@@ -219,6 +219,8 @@ const feedbackForm = ref({ seatNum: "", content: "" });
 onMounted(() => {
   loadMyStats();
   loadRoomStats();
+  // ✨ 新增：初始化默认预约时间为未来 1-2 小时
+  initDefaultTime();
 });
 
 // --- 业务逻辑 ---
@@ -249,6 +251,26 @@ const loadRoomStats = async () => {
   }
 };
 
+const initDefaultTime = () => {
+  const now = new Date();
+  let currentHour = now.getHours();
+
+  // 计算开始小时（当前小时 + 1）
+  // 注意：如果超过 22 点（闭馆时间），可以根据业务逻辑处理，这里简单处理
+  let startH = currentHour + 1;
+  let endH = currentHour + 2;
+
+  // 边界处理：如果超过 22 点，默认选第二天早上的时间或维持现状
+  if (startH >= 22) {
+    startTime.value = "08:00";
+    endTime.value = "10:00";
+  } else {
+    // 格式化为 "HH:00" 格式
+    startTime.value = `${String(startH).padStart(2, "0")}:00`;
+    endTime.value = `${String(endH).padStart(2, "0")}:00`;
+  }
+};
+
 // 3. 切换阅览室
 const handleSwitchRoom = (room) => {
   currentRoomId.value = room.roomId;
@@ -259,8 +281,16 @@ const handleSwitchRoom = (room) => {
 // 4. 加载座位
 const loadSeats = async () => {
   if (!currentRoomId.value) return;
+
+  // 拼接完整的时间字符串，发给后端进行范围查询
+  const fullStart =
+    formatDateStr(searchDate.value) + " " + startTime.value + ":00";
+  const fullEnd = formatDateStr(searchDate.value) + " " + endTime.value + ":00";
+
   const res = await request.get("/api/room/seats", {
     params: { roomId: currentRoomId.value },
+    startTime: fullStart, // 💡 新增：发送开始时间
+    endTime: fullEnd, // 💡 新增：发送结束时间
   });
 
   // 映射字段并处理大小写兼容
@@ -270,7 +300,7 @@ const loadSeats = async () => {
     xaxis: s.xaxis || s.xAxis || s.x_axis || 0,
     yaxis: s.yaxis || s.yAxis || s.y_axis || 0,
     // 简单模拟占用状态（实际应结合时间段查询后端）
-    _occupied: false,
+    _occupied: s.isOccupied === 1,
   }));
   // 清除选中状态
   selectedSeatId.value = null;

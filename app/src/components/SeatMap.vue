@@ -114,7 +114,7 @@ const emit = defineEmits(["select"]);
 // 计算主体样式 (状态颜色)
 const getSeatClass = (seat) => {
   if (seat.status === 0) return "disabled";
-  if (seat._occupied) return "occupied";
+  if (seat._occupied || seat.isOccupied) return "occupied";
   if (props.selectedId === seat.seatId) return "selected";
   return "available";
 };

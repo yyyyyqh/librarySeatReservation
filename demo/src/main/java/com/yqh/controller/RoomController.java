@@ -35,11 +35,15 @@ public class RoomController {
 
     // 获取某个阅览室的所有座位（包含坐标）
     @GetMapping("/seats")
-    public Result<List<Seat>> getSeatsByRoom(@RequestParam Long roomId) {
-        return Result.success(seatMapper.selectList(
-                new LambdaQueryWrapper<Seat>().eq(Seat::getRoomId, roomId)
-        ));
+    public Result<List<Seat>> getSeatsByRoom(
+            @RequestParam Long roomId,
+            @RequestParam(required = false) String startTime,
+            @RequestParam(required = false) String endTime) {
+
+        // 如果前端传了时间，就按时间段查；没传，默认按 NOW() 查
+        return Result.success(seatMapper.getSeatStatusByRoom(roomId, startTime, endTime));
     }
+
     @GetMapping("/list-with-stats")
     public Result<List<Map<String, Object>>> listWithStats() {
         List<ReadingRoom> rooms = roomService.list();

@@ -31,4 +31,11 @@ public class Seat {
     private Integer hasSocket; // 1:有, 0:无
     private Integer isWindow;  // 1:是, 0:否
     private Integer status;    // 1:正常, 0:停用
+
+    /**
+     * 占用状态：0-空闲，1-占用
+     * 此字段不在数据库表中，由 SQL 动态计算
+     */
+    @TableField(exist = false)
+    private Integer isOccupied;
 }
