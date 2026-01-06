@@ -9,6 +9,7 @@
       <div class="item"><span class="badge-icon window">🪟</span>靠窗</div>
     </div>
 
+    <!-- 座椅布局 -->
     <svg viewBox="0 0 800 600" class="seat-svg">
       <rect
         x="10"
@@ -26,15 +27,10 @@
         class="seat-group"
         @click="handleSeatClick(seat)"
       >
-        <!-- <circle
-          :cx="seat.xaxis"
-          :cy="seat.yaxis"
-          r="16"
-          :class="['seat-shape', getSeatClass(seat)]"
-        /> -->
+        <!-- 座椅 -->
         <Chair
           :status="getSeatClass(seat)"
-          :transform="`translate(${seat.xaxis}, ${seat.yaxis})`"
+          :transform="`translate(${seat.xaxis}, ${seat.yaxis}) scale(1.7)`"
         />
 
         <text
@@ -46,18 +42,19 @@
         >
           {{ seat.seatNum }}
         </text>
-
+        <!-- 插座符号 -->
+        <!-- translate偏移量 -->
         <g
           v-if="seat.hasSocket"
-          :transform="`translate(${seat.xaxis + 12}, ${seat.yaxis - 12})`"
+          :transform="`translate(${seat.xaxis + 15}, ${seat.yaxis - 15})`"
         >
           <circle r="7" fill="#E6A23C" stroke="white" stroke-width="1" />
           <path d="M-1 -4 L3 -4 L0 0 L2 0 L-2 5 L-1 1 L-3 1 Z" fill="white" />
         </g>
-
+        <!-- 靠窗符号 -->
         <g
           v-if="seat.isWindow"
-          :transform="`translate(${seat.xaxis - 12}, ${seat.yaxis - 12})`"
+          :transform="`translate(${seat.xaxis - 15}, ${seat.yaxis - 15})`"
         >
           <circle r="7" fill="#409EFF" stroke="white" stroke-width="1" />
           <rect
@@ -229,7 +226,7 @@ const handleSeatClick = (seat) => {
   }
 
   .seat-text {
-    font-size: 10px;
+    font-size: 15px;
     fill: white;
     font-weight: bold;
     pointer-events: none;
