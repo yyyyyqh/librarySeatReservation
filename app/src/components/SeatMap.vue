@@ -26,11 +26,15 @@
         class="seat-group"
         @click="handleSeatClick(seat)"
       >
-        <circle
+        <!-- <circle
           :cx="seat.xaxis"
           :cy="seat.yaxis"
           r="16"
           :class="['seat-shape', getSeatClass(seat)]"
+        /> -->
+        <Chair
+          :status="getSeatClass(seat)"
+          :transform="`translate(${seat.xaxis}, ${seat.yaxis})`"
         />
 
         <text
@@ -92,6 +96,7 @@
 
 <script setup>
 import { defineProps, defineEmits } from "vue";
+import Chair from "./icons/chair.vue";
 
 const props = defineProps({
   seatList: {
