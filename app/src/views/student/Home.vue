@@ -102,15 +102,18 @@
                   size="small"
                   placeholder="开始"
                   style="width: 100px"
+                  @change="loadSeats"
                 />
                 <el-time-select
                   v-model="endTime"
+                  :min-time="startTime"
                   start="08:00"
                   step="01:00"
                   end="22:00"
                   size="small"
                   placeholder="结束"
                   style="width: 100px"
+                  @change="loadSeats"
                 />
                 <el-button type="primary" size="small" @click="loadSeats"
                   >刷新</el-button
