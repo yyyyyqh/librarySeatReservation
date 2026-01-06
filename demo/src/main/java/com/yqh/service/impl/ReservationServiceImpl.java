@@ -31,6 +31,15 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
         LocalDateTime start = LocalDateTime.parse(startTimeStr, DF);
         LocalDateTime end = LocalDateTime.parse(endTimeStr, DF);
 
+        // 校验该用户当前是否已有未结束的预约
+        Long userActiveCount = this.count(new LambdaQueryWrapper<Reservation>()
+                .eq(Reservation::getUserId, userId)
+                .in(Reservation::getStatus, Arrays.asList(0, 1))
+                .gt(Reservation::getEndTime, LocalDateTime.now()));
+        if (userActiveCount > 0) {
+            throw new RuntimeException("您当前已有进行中的预约，请结束后再试");
+        }
+
         // 1. 校验用户信用分
         User user = userMapper.selectById(userId);
         if (user == null) {
