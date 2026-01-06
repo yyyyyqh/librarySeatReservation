@@ -212,9 +212,9 @@
 
 <script setup>
 import { ref, reactive, onMounted, computed } from "vue";
-import request from "../../utils/request";
+import request from "@/utils/request";
 import { ElMessage, ElMessageBox } from "element-plus";
-import SeatMap from "../../components/SeatMap.vue";
+import SeatMap from "@/components/SeatMap.vue";
 
 // --- 基础数据 ---
 const roomList = ref([]);
