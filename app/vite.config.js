@@ -23,4 +23,15 @@ export default defineConfig({
       },
     },
   },
+  css: {
+    preprocessorOptions: {
+      scss: {
+        // 自动给每个 scss 代码块头部加上这两行
+        additionalData: `
+          @use "@/assets/styles/variables.scss" as *;
+          @use "@/assets/styles/mixins.scss" as *;
+        `,
+      },
+    },
+  },
 });

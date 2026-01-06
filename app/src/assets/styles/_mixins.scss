@@ -1,0 +1,31 @@
+// src/assets/styles/mixins.scss
+// 使用 SCSS Mixin 统一管理媒体查询，避免在每个 Vue 文件里手写 @media。
+@use "variables" as *;
+
+// 手机端适配 (小于 768px)
+@mixin mobile {
+  @media screen and (max-width: #{$breakpoint-sm}) {
+    @content;
+  }
+}
+
+// 桌面端适配 (大于 768px)
+@mixin desktop {
+  @media screen and (min-width: #{$breakpoint-sm + 1px}) {
+    @content;
+  }
+}
+
+// 通用隐藏类生成器
+@mixin responsive-visibility {
+  .hidden-xs-only {
+    @include mobile {
+      display: none !important;
+    }
+  }
+  .hidden-sm-and-up {
+    @include desktop {
+      display: none !important;
+    }
+  }
+}

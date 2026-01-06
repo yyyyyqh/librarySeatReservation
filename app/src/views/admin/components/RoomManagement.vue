@@ -94,7 +94,7 @@
 
 <script setup>
 import { ref, reactive, onMounted } from "vue";
-import request from "../../utils/request";
+import request from "../../../utils/request";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const loading = ref(false);

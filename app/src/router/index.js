@@ -5,7 +5,7 @@ const routes = [
   {
     path: "/login",
     name: "Login",
-    component: () => import("../views/Login.vue"),
+    component: () => import("@/views/auth/Login.vue"),
   },
   {
     path: "/",
@@ -14,19 +14,22 @@ const routes = [
   {
     path: "/register",
     name: "Register",
-    component: () => import("../views/Register.vue"),
+    component: () => import("@/views/auth/Register.vue"),
   },
   // 学生端路由
   {
     path: "/student",
     meta: { requiresAuth: true, role: 0 },
-    component: () => import("../views/StudentLayout.vue"),
+    component: () => import("@/views/student/index.vue"),
     children: [
-      { path: "home", component: () => import("../views/student/Home.vue") },
+      {
+        path: "home",
+        component: () => import("../views/student/components/Home.vue"),
+      },
 
       {
         path: "profile",
-        component: () => import("../views/student/Profile.vue"),
+        component: () => import("../views/student/components/Profile.vue"),
       },
     ],
   },
@@ -34,38 +37,38 @@ const routes = [
   {
     path: "/admin",
     meta: { requiresAuth: true, role: 2 }, // 标记权限
-    component: () => import("../views/AdminLayout.vue"),
+    component: () => import("@/views/admin/index.vue"),
     redirect: "/admin/dashboard", // 默认跳到 dashboard
     children: [
       {
         path: "dashboard",
         name: "数据大屏",
-        component: () => import("../views/admin/Dashboard.vue"),
+        component: () => import("@/views/admin/components/Dashboard.vue"),
       },
       {
         path: "room",
         name: "阅览室管理",
-        component: () => import("../views/admin/RoomManagement.vue"),
+        component: () => import("@/views/admin/components/RoomManagement.vue"),
       },
       {
         path: "seat",
         name: "座位管理",
-        component: () => import("../views/admin/SeatManagement.vue"),
-      },
-      {
-        path: "/student",
-        component: () => import("../views/StudentLayout.vue"), // 假设您有这个布局文件
-        children: [
-          {
-            path: "home",
-            component: () => import("../views/student/Home.vue"),
-          },
-        ],
+        component: () => import("@/views/admin/components/SeatManagement.vue"),
       },
       {
         path: "user",
         name: "用户管理",
-        component: () => import("../views/admin/UserManagement.vue"),
+        component: () => import("@/views/admin/components/UserManagement.vue"),
+      },
+      {
+        path: "/student",
+        component: () => import("@/views/student/index.vue"), // ？？
+        children: [
+          {
+            path: "home",
+            component: () => import("../views/student/components/Home.vue"),
+          },
+        ],
       },
     ],
   },

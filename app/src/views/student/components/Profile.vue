@@ -189,8 +189,8 @@
 
 <script setup>
 import { ref, onMounted, computed } from "vue";
-import request from "../../utils/request";
-import { useUserStore } from "../../stores/user";
+import request from "../../../utils/request";
+import { useUserStore } from "../../../stores/user";
 import { ElMessage, ElMessageBox } from "element-plus";
 
 const userStore = useUserStore();

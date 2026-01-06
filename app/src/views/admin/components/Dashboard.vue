@@ -1,3 +1,4 @@
+<!-- 管理员数据大屏 -->
 <template>
   <div class="admin-dashboard">
     <el-row :gutter="20" class="data-cards">
@@ -76,7 +77,7 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from "vue";
 import * as echarts from "echarts";
-import request from "../../utils/request";
+import request from "@/utils/request";
 
 // 数据定义
 const summary = ref({});
