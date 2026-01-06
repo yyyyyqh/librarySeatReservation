@@ -49,7 +49,7 @@ defineProps({
 
 /* 状态配色 */
 .available {
-  color: #cbd5e0;
+  color: #67c23a;
 }
 .selected {
   color: #63b3ed;
