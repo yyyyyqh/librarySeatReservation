@@ -338,7 +338,13 @@ const submitReservation = async () => {
     ElMessage.success("预约成功！");
     dialogVisible.value = false;
     selectedSeatId.value = null;
-    // 这里可以后续加刷新逻辑
+
+    // 1. 刷新座位图（让刚才约的座位变红）
+    await loadSeats();
+    // 2. 刷新左侧阅览室拥挤度（剩余座位 -1）
+    loadRoomStats();
+    // 3. 刷新顶部个人统计（学习时长/排名可能变化）
+    loadMyStats();
   } finally {
     submitting.value = false;
   }

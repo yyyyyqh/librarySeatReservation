@@ -421,6 +421,7 @@ const submitBatch = async () => {
 
     ElMessage.success(`成功生成 ${seatsToAdd.length} 个座位！`);
     batchDialogVisible.value = false;
+    // 增加 300ms 延迟，等待后端事务完全提交
     refreshData();
   } catch (e) {
     console.error(e);
