@@ -55,7 +55,7 @@
 <script setup>
 import { ref, reactive } from "vue";
 import { useRouter } from "vue-router";
-import request from "../utils/request";
+import request from "@/utils/request";
 import { ElMessage } from "element-plus";
 
 const router = useRouter();
