@@ -5,8 +5,10 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.yqh.entity.Reservation;
 import com.yqh.entity.User;
 import com.yqh.mapper.ReservationMapper;
+import com.yqh.mapper.SeatMapper;
 import com.yqh.mapper.UserMapper;
 import com.yqh.service.IReservationService;
+import com.yqh.service.ISeatService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
@@ -22,12 +24,18 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
 
     @Autowired
     private UserMapper userMapper;
+    @Autowired
+    private SeatMapper seatMapper;
 
     private static final DateTimeFormatter DF = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     @Override
     @Transactional(rollbackFor = Exception.class, isolation = Isolation.READ_COMMITTED) // [cite: 231]
     public boolean reserveSeat(Long userId, Long seatId, String startTimeStr, String endTimeStr) {
+        // 这行代码会发送 "SELECT ... FOR UPDATE" SQL 到数据库。
+        // 它会锁住该座位行，直到当前事务结束。其他想约这个座位的请求会被阻塞在这里排队。
+        seatMapper.selectSeatForUpdate(seatId);
+
         LocalDateTime start = LocalDateTime.parse(startTimeStr, DF);
         LocalDateTime end = LocalDateTime.parse(endTimeStr, DF);
 
@@ -71,6 +79,7 @@ public class ReservationServiceImpl extends ServiceImpl<ReservationMapper, Reser
         reservation.setStatus(0); // 初始状态: 待签到
 
         return this.save(reservation);
+        // 方法结束，事务提交，锁自动释放
     }
 
     @Override

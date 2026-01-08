@@ -8,6 +8,14 @@ import java.util.List;
 import java.util.Map;
 
 public interface SeatMapper extends BaseMapper<Seat> {
+    /**
+     * 悲观锁核心方法
+     * 作用：根据 seatId 查询座位信息，并强制加上 MySQL 行级排他锁 (X锁)
+     * 注意：必须在 @Transactional 事务中使用才能生效，事务结束自动释放锁
+     */
+    @Select("SELECT * FROM sys_seat WHERE seat_id = #{seatId} FOR UPDATE")
+    Seat selectSeatForUpdate(@Param("seatId") Long seatId);
+
 
     @Select("<script>" +
             "SELECT s.*, " +
